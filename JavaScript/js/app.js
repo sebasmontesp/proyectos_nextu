@@ -1,8 +1,7 @@
 // Módulo calculadora
-var CalculadoraModule = {};
- 
-// Library definition
-CalculadoraModule = (function () {
+var Calculadora = {};
+
+Calculadora = (function () {
 	// Variables privadas
 	var numeroTmp = "0", numeroA = 0, numeroB = 0, resultado = 0, operacion = "";
 
@@ -21,7 +20,20 @@ CalculadoraModule = (function () {
 		} else if(id == 'punto'){
 			puntoDecimal();
 		} else if(id == 'igual'){
-			calcularResultado();
+			if(numeroTmp != "0"){
+				if(numeroA == 0){//Primer número a operar
+					numeroA = parseFloat(numeroTmp);
+				} else {//Segundo número a operar
+					numeroB = parseFloat(numeroTmp);
+				}
+			}
+
+			resultado = calcularResultado(numeroA, numeroB, operacion);
+			numeroA = 0;
+			numeroTmp = resultado + "";
+
+			display(numeroTmp);
+
 		} else if(id == 'sign'){
 			cambiarSigno();
 		} else if(id == 'on'){
@@ -61,13 +73,24 @@ CalculadoraModule = (function () {
 				numeroTmp = "0";
 			} else {//Segundo número a operar
 				numeroB = parseFloat(numeroTmp);
-				calcularResultado();
+				numeroTmp = "0";
+				resultado = calcularResultado(numeroA, numeroB, operacion);
+				numeroA = 0;
+				numeroTmp = resultado + "";
+				display(numeroTmp);
+
+				procesarOperacion();
 			}
 
 		}
+		
+		if(resultado != 0){
+			display(resultado);
+		}else {
+			display(numeroTmp);
+		}
 
 		operacion = oper;
-		display(numeroTmp);
 
 	}
 
@@ -95,31 +118,20 @@ CalculadoraModule = (function () {
 		display(numeroTmp);
 	}
 
-	//Método qu ejecuta la operación indicada con los últimos 2 números
-	function calcularResultado(){
+	//Método que ejecuta la operación indicada con los 2 números dados
+	function calcularResultado(numA, numB, oper){
 
-		if(numeroTmp != "0"){
-			if(numeroA == 0){//Primer número a operar
-				numeroA = parseFloat(numeroTmp);
-			} else {//Segundo número a operar
-				numeroB = parseFloat(numeroTmp);
-			}
-		}
-
-		if(operacion == 'mas'){
-			resultado = numeroA + numeroB;
+		if(oper == 'mas'){
+			resultado = numA + numB;
 		} else if(operacion == 'menos'){
-			resultado = numeroA - numeroB;
+			resultado = numA - numB;
 		} else if(operacion == 'por'){
-			resultado = numeroA * numeroB;
+			resultado = numA * numB;
 		} else if(operacion == 'dividido'){
-			resultado = numeroA / numeroB;
+			resultado = numA / numB;
 		}
 
-		numeroA = 0;
-		numeroTmp = resultado + "";
-
-		display(numeroTmp);
+		return resultado;
 	}
 
 	//Método que limpia la pantalla y asigna los valores iniciales
@@ -134,6 +146,7 @@ CalculadoraModule = (function () {
 		display(resultado);
 	}
 
+	//Presenta el valor indicado en la pantalla
 	function display(valor){
 		if(valor.length > 8){
 			valor = parseFloat(valor).toPrecision(8) + "";
@@ -141,17 +154,40 @@ CalculadoraModule = (function () {
 		}
 		document.getElementById("display").innerHTML = valor;
 	}
+	
+	//Cambia visualmente una tecla
+	function resaltarTecla(event){
+		var tecla = (event.target || event.srcElement);
+
+		//Cambiar tamaño visualmente
+		tecla.style.width = tecla.width * 0.9 + "px";
+		tecla.style.height = tecla.height * 0.9 + "px";
+	}
+	
+	//Restaura la tecla a su tamaño original
+	function restablecerTecla(event){
+		var tecla = (event.target || event.srcElement);
+
+		//Cambiar tamaño visualmente
+		tecla.style.width = tecla.width / 0.9 + "px";
+		tecla.style.height = tecla.height / 0.9 + "px";
+	}
 
 	// API expuesta
 	return {
 		inicializar: function () {
-			//Procesar evento click de las teclas
+			//Procesar eventos de las teclas
 			var teclas = document.getElementsByClassName("tecla");
 			for(var i=0; i<teclas.length; i++){
 				teclas[i].addEventListener('click', procesarTecla);
+				teclas[i].addEventListener('mousedown', resaltarTecla);
+				teclas[i].addEventListener('mouseup', restablecerTecla);
 			}
 		}
 	}
 }());
 
-CalculadoraModule.inicializar();
+//Ejecutar al cargue de la página
+document.getElementsByTagName("body")[0].onload = function(){
+	Calculadora.inicializar();
+};
