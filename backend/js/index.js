@@ -59,10 +59,30 @@ $(function(){
 	inicializarTipos();
 	
 	$('#formulario').submit(submitInfo);
-	
+	$('#mostrarTodos').on('click', function(){
+		
+		var form_data = getInfoForm(true);
+		$.ajax({
+			url: './index.php',
+			dataType: 'text',
+			cache: false,
+			contentType: false,
+			processData: false,
+			data: form_data,
+			type: 'post',
+			success: function(data){
+				mostrarResultados(data);
+			},
+			error: function(){
+				alert("error al cargar los resultados");
+			}
+		})
+		
+	});
 
 })
 
+/* Función auxiliar que carga la lista de ciudades disponibles*/
 function inicializarCiudades(){
 	$.ajax({
 		url: './ciudades.php',
@@ -90,6 +110,7 @@ function inicializarCiudades(){
 	
 }
 
+/* Función auxiliar que carga la lista de tipos de propiedad disponibles*/
 function inicializarTipos(){
 	$.ajax({
 		url: './tipos.php',
@@ -117,6 +138,7 @@ function inicializarTipos(){
 	
 }
 
+/* Función auxiliar que arma la plantilla HTML para un resultado*/
 function getPlantilla(objPropiedad){
 	// number formatter para presentar el valor en tipo moneda
 	var formatter = new Intl.NumberFormat('en-US', {
@@ -144,12 +166,23 @@ function getPlantilla(objPropiedad){
 	return plantilla;
 }
 
+/* Función auxiliar que muestra los resultados obtenidos*/
+function mostrarResultados(data){
+	var objLista = JSON.parse(data);
+
+	$('#resultados').html(" ");
+	for (x in objLista) {
+		$("#resultados").append( getPlantilla(objLista[x]) );
+	}
+	
+}
+
 /*
   Función que envía vía AJAX  los criterios de búsqueda
 */
 function submitInfo(event){
 	event.preventDefault();
-	var form_data = getInfoForm();
+	var form_data = getInfoForm(false);
 	$.ajax({
 		url: './index.php',
 		dataType: 'text',
@@ -159,13 +192,7 @@ function submitInfo(event){
 		data: form_data,
 		type: 'post',
 		success: function(data){
-			var objLista = JSON.parse(data);
-			
-			for (x in objLista) {
-				$(".colContenido").append( getPlantilla(objLista[x]) );
-			}
-			
-			//window.location.href = 'index.html';
+			mostrarResultados(data);
 		},
 		error: function(){
 			alert("error al enviar el formulario");
@@ -175,13 +202,21 @@ function submitInfo(event){
 }
 
 /*
-  Función que recopila los datos del formulario en una variable
+  Función que recopila los datos del formulario en una variable.
+  @mostrarTodos: Si se indica el valor 'true', asocia los valores del formulario vacío
 */
-function getInfoForm(){
-  var form_data = new FormData();
-  form_data.append('ciudad', $("[name='ciudad']").val());
-  form_data.append('tipo', $("[name='tipo']").val());
-  form_data.append('precio', $("[name='precio']").val());
+function getInfoForm(mostrarTodos){
+	var form_data = new FormData();
 
-  return form_data;
+	if(mostrarTodos == true){
+		form_data.append('ciudad', '');
+		form_data.append('tipo', '');
+		form_data.append('precio', '0:100000');
+	}else{
+		form_data.append('ciudad', $("[name='ciudad']").val());
+		form_data.append('tipo', $("[name='tipo']").val());
+		form_data.append('precio', $("[name='precio']").val());
+	}
+
+	return form_data;
 }
