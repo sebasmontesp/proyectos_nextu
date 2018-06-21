@@ -32,8 +32,7 @@ function playVideoOnScroll(){
   var ultimoScroll = 0,
       intervalRewind;
   var video = document.getElementById('vidFondo');
-  $(window)
-    .scroll((event)=>{
+  $(window).scroll( function(event){
       var scrollActual = $(window).scrollTop();
       if (scrollActual > ultimoScroll){
        video.play();
@@ -42,8 +41,7 @@ function playVideoOnScroll(){
         video.play();
      }
      ultimoScroll = scrollActual;
-    })
-    .scrollEnd(()=>{
+    }).scrollEnd( function(){
       video.pause();
     }, 10)
 }
@@ -63,7 +61,7 @@ $(function(){
 		
 		var form_data = getInfoForm(true);
 		$.ajax({
-			url: './index.php',
+			url: './resultados.php',
 			dataType: 'text',
 			cache: false,
 			contentType: false,
@@ -184,7 +182,7 @@ function submitInfo(event){
 	event.preventDefault();
 	var form_data = getInfoForm(false);
 	$.ajax({
-		url: './index.php',
+		url: './resultados.php',
 		dataType: 'text',
 		cache: false,
 		contentType: false,
@@ -211,7 +209,7 @@ function getInfoForm(mostrarTodos){
 	if(mostrarTodos == true){
 		form_data.append('ciudad', '');
 		form_data.append('tipo', '');
-		form_data.append('precio', '0:100000');
+		form_data.append('precio', '0;100000');
 	}else{
 		form_data.append('ciudad', $("[name='ciudad']").val());
 		form_data.append('tipo', $("[name='tipo']").val());
